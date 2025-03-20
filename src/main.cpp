@@ -1,7 +1,6 @@
 #include "raylib.h"
 #include "camera.hpp"
 #include <cmath>
-#include <cstdint>
 using namespace std;
 
 #define WIDTH 1920
