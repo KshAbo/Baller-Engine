@@ -1,4 +1,5 @@
 #include "camera.hpp"
+#include "raylib/raymath.h"
 #include <iostream>
 
 BallerEngine::Camera::Camera(Vector3 position, Vector3 target, Vector3 up, float fov){

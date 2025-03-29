@@ -1,8 +1,7 @@
 #ifndef CAMERA_H
 #define CAMERA_H
 
-#include "raylib.h"
-#include "raymath.h"
+#include "raylib/raylib.h"
 
 namespace BallerEngine{
 
