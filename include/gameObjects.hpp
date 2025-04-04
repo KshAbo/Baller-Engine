@@ -1,0 +1,97 @@
+#ifndef GAME_OBJECTS_H
+#define GAME_OBJECTS_H
+
+#include <iostream>
+
+#include "bullet/btBulletDynamicsCommon.h"
+#include "camera.hpp"
+#include "controller.hpp"
+#include "physicsEngine.hpp"
+#include "raylib/raylib.h"
+
+// Collider shape
+enum Shape {
+  CUBE,
+  SPHERE,
+};
+
+enum PhysicsType {
+  STATIC,
+  DYNAMIC,
+};
+
+class PhysicsObject {
+protected:
+  btRigidBody *body;
+  btCollisionShape *collider_shape;
+  Model model;
+
+public:
+  Color color;
+
+  PhysicsObject(Vector3 position = {0, 0, 0}, Vector3 rotation = {0, 0, 0},
+                Vector3 size = {1, 1, 1}, Shape shape = CUBE,
+                PhysicsType type = STATIC, float mass = 0, Color color = WHITE);
+  void attachShader(Shader shader);
+  void render();
+  ~PhysicsObject();
+};
+
+// Car class
+class Car : public PhysicsObject {
+
+  Controller controller;
+
+  void stabilize() {
+    btVector3 up = getUpVector();
+    btVector3 correctionTorque =
+        up.cross(btVector3(0, 1, 0)) * -500; // Adjust strength
+    body->applyTorque(correctionTorque);
+  }
+
+  void resetOrientation() {
+    btVector3 up = getUpVector();
+    btScalar dotProduct = up.dot(btVector3(0, 1, 0));
+    btTransform transform;
+    body->getMotionState()->getWorldTransform(transform);
+    btQuaternion uprightRotation(btVector3(0, 1, 0), 0);
+    transform.setRotation(uprightRotation);
+    body->setWorldTransform(transform);
+    body->setAngularVelocity(btVector3(0, 0, 0));
+  }
+
+public:
+  GameCamera camera;
+
+  Car(const Vector3 pos);
+
+  bool isOnGround();
+
+  void applyForce(const btVector3 &force);
+
+  void applyImpulse(const btVector3 &impulse);
+
+  void applyTorque(const btVector3 &torque);
+
+  btVector3 getForwardVector();
+
+  btVector3 getOrigin();
+
+  btTransform getTransform();
+
+  btVector3 getUpVector();
+
+  Vector3 getCameraPosition();
+
+  void update(int socket);
+};
+
+// Ball class
+class Ball : public PhysicsObject {
+public:
+  Ball(const Vector3 pos)
+      : PhysicsObject({0, 10, 0}, {0, 0, 0}, {5, 5, 5}, SPHERE, DYNAMIC, 200,
+                      WHITE) {}
+};
+
+#endif // !GAME_OBJECTS_H

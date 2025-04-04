@@ -1,5 +1,3 @@
 build/*
-!build/shader/
-!build/shader/*
 .cache/
 .ccls-cache/
