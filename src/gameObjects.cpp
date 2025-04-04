@@ -21,14 +21,18 @@ PhysicsObject::PhysicsObject(Vector3 position, Vector3 rotation, Vector3 size,
   btTransform transform;
   transform.setIdentity();
   transform.setOrigin(btVector3(position.x, position.y, position.z));
-  transform.setRotation(btQuaternion(btScalar(rotation.z), btScalar(rotation.y),
-                                     btScalar(rotation.x)));
+  btQuaternion quat;
+  quat.setEuler(btScalar(rotation.y), btScalar(rotation.x), // In radians
+                btScalar(rotation.z));
+  transform.setRotation(quat);
 
   btScalar object_mass(mass);
 
-  // Calculate local inertia for dynamic objects
+  // Calculate local inertia for dynamic
+  // objects
   btVector3 local_inertia(0, 0, 0);
-  if (type == DYNAMIC || mass != 0.0) // Objects with 0.0 mass are static
+  if (type == DYNAMIC || mass != 0.0) // Objects with 0.0 mass
+                                      // are static
     collider_shape->calculateLocalInertia(mass, local_inertia);
 
   btDefaultMotionState *motion_state = new btDefaultMotionState(transform);
@@ -76,8 +80,8 @@ void PhysicsObject::render() {
 
 PhysicsObject::~PhysicsObject() { UnloadModel(model); }
 
-Car::Car(const Vector3 pos)
-    : PhysicsObject(pos, {0, 0, 0}, {4.5, 2, 3}, CUBE, DYNAMIC, 500, RED),
+Car::Car(const Vector3 pos, const Vector3 rot, Input input)
+    : PhysicsObject(pos, rot, {4.5, 2, 3}, CUBE, DYNAMIC, 500, RED),
       controller(this), camera(Vector3{pos.x - 1, pos.y + 1, pos.z},
                                Vector3{pos.x, pos.y + 1, pos.z}, this) {
   body->setFriction(0.0f);
@@ -90,7 +94,7 @@ Car::Car(const Vector3 pos)
 bool Car::isOnGround() {
   btTransform transform;
   body->getMotionState()->getWorldTransform(transform);
-  return (transform.getOrigin().getY() < 1.1) ? true : false;
+  return (transform.getOrigin().getY() < 1.5) ? true : false;
 }
 
 void Car::applyForce(const btVector3 &force) { body->applyCentralForce(force); }
@@ -136,4 +140,21 @@ void Car::update(int socket) {
     resetOrientation();
   }
   controller.update(socket);
+}
+
+void Car::stabilize() {
+  btVector3 up = getUpVector();
+  btVector3 correctionTorque = up.cross(btVector3(0, 1, 0)) * -500;
+  body->applyTorque(correctionTorque);
+}
+
+void Car::resetOrientation() {
+  btVector3 up = getUpVector();
+  btScalar dotProduct = up.dot(btVector3(0, 1, 0));
+  btTransform transform;
+  body->getMotionState()->getWorldTransform(transform);
+  btQuaternion uprightRotation(btVector3(0, 1, 0), 0);
+  transform.setRotation(uprightRotation);
+  body->setWorldTransform(transform);
+  body->setAngularVelocity(btVector3(0, 0, 0));
 }

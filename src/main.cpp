@@ -26,14 +26,14 @@ int main(int argc, char *argv[]) {
   HideCursor();
   DisableCursor();
 
-  Model cube = LoadModel("../obj/monkey.obj");
+  Model customModel = LoadModel("../obj/monkey.obj");
   Shader shader1 =
       LoadShader("./shader/vertex.vert", "./shader/fragment1.frag");
   Shader shader2 =
       LoadShader("./shader/vertex.vert", "./shader/fragment2.frag");
   Shader shader3 = LoadShader("./shader/vertex.vert", "./shader/ball.frag");
 
-  cube.materials[0].shader = shader1;
+  customModel.materials[0].shader = shader1;
 
   BallerEngine::Camera camera({0, 10, 10}, {0, 0, 0}, 45);
 
@@ -59,7 +59,8 @@ int main(int argc, char *argv[]) {
   wall3.attachShader(shader2);
   wall4.attachShader(shader2);
 
-  Car car(Vector3{10, 0, 0});
+  Car car(Vector3{20, 0, 0}, Vector3{0, 3.14, 0}, GESTURE);
+  // Car car1(Vector3{-20, 0, 0}, Vector3{0, 0, 0}, KEYBOARD);
   Ball ball(Vector3{0, 0, 0});
   ball.attachShader(shader3);
 
@@ -86,7 +87,7 @@ int main(int argc, char *argv[]) {
     SetShaderValue(shader2, GetShaderLocation(shader2, "cameraPosition"),
                    &cameraPosition, SHADER_UNIFORM_VEC3);
 
-    box = GetModelBoundingBox(cube);
+    box = GetModelBoundingBox(customModel);
 
     // Rendering
     BeginDrawing();
@@ -96,7 +97,7 @@ int main(int argc, char *argv[]) {
     BeginMode3D(car.camera.camera);
 
     DrawCube(lightPosition, 0.5f, 0.5f, 0.5f, WHITE);
-    DrawModel(cube, Vector3{0, 0, 0}, 1.0, WHITE);
+    DrawModel(customModel, Vector3{0, 0, 0}, 1.0, WHITE);
     DrawBoundingBox(box, BLUE);
 
     PhysicsEngine::getEngine()->update(GetFPS());
@@ -107,6 +108,8 @@ int main(int argc, char *argv[]) {
     wall4.render();
     car.update(sock);
     car.render();
+    // car1.update(sock);
+    // car1.render();
     ball.render();
 
     camera.updateCamera();
@@ -116,14 +119,18 @@ int main(int argc, char *argv[]) {
 
     DrawFPS(10, 10);
     btVector3 carLoc = car.getOrigin();
-    DrawText(TextFormat("Car Coordinates: %i %i %i", (int)carLoc.x(),
-                        (int)carLoc.y(), (int)carLoc.z()),
+    btScalar x, y, z;
+    car.getTransform().getRotation().getEulerZYX(z, y, x);
+    DrawText(TextFormat("Car Coordinates: %.2f %.2f %.2f", carLoc.x(),
+                        carLoc.y(), carLoc.z()),
              10, 30, 20, RED);
+    DrawText(TextFormat("Car Rotation: %.2f %.2f %.2f", x, y, z), 10, 50, 20,
+             RED);
 
     EndDrawing();
   }
 
-  UnloadModel(cube);
+  UnloadModel(customModel);
   UnloadShader(shader1);
   UnloadShader(shader2);
   UnloadShader(shader3);

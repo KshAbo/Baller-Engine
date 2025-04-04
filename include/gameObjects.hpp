@@ -42,47 +42,24 @@ class Car : public PhysicsObject {
 
   Controller controller;
 
-  void stabilize() {
-    btVector3 up = getUpVector();
-    btVector3 correctionTorque =
-        up.cross(btVector3(0, 1, 0)) * -500; // Adjust strength
-    body->applyTorque(correctionTorque);
-  }
-
-  void resetOrientation() {
-    btVector3 up = getUpVector();
-    btScalar dotProduct = up.dot(btVector3(0, 1, 0));
-    btTransform transform;
-    body->getMotionState()->getWorldTransform(transform);
-    btQuaternion uprightRotation(btVector3(0, 1, 0), 0);
-    transform.setRotation(uprightRotation);
-    body->setWorldTransform(transform);
-    body->setAngularVelocity(btVector3(0, 0, 0));
-  }
+  void stabilize();
+  void resetOrientation();
 
 public:
   GameCamera camera;
 
-  Car(const Vector3 pos);
+  Car(const Vector3 pos = Vector3{0, 0, 0},
+      const Vector3 rot = Vector3{0, 0, 0}, Input input = GESTURE);
 
   bool isOnGround();
-
   void applyForce(const btVector3 &force);
-
   void applyImpulse(const btVector3 &impulse);
-
   void applyTorque(const btVector3 &torque);
-
   btVector3 getForwardVector();
-
   btVector3 getOrigin();
-
   btTransform getTransform();
-
   btVector3 getUpVector();
-
   Vector3 getCameraPosition();
-
   void update(int socket);
 };
 

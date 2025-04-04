@@ -26,6 +26,6 @@ void Controller::steerRight() {
 void Controller::jump() {
   if (car->isOnGround()) {
     btVector3 up = car->getUpVector();
-    car->applyImpulse(up * 500);
+    car->applyImpulse(up * 5000);
   }
 }
