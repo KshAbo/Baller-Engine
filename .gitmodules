@@ -1,0 +1,11 @@
+[submodule "raylib"]
+    path = raylib
+    url = https://github.com/raysan5/raylib
+
+[submodule "bullet3"]
+    path = bullet3
+    url = https://github.com/bulletphysics/bullet3
+
+[submodule "mediapipe"]
+    path = mediapipe
+    url = https://github.com/google/mediapipe
